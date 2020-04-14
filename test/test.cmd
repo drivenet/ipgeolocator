@@ -1,0 +1,1 @@
+@curl http://localhost:5002/v0.1/locate -vvvv --data-binary @test.txt -H "Content-Type: text/plain"

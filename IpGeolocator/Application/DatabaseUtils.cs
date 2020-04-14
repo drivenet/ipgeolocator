@@ -1,56 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
-using System.Net;
 using System.Text;
-
-using IpGeolocator.Geolocator.Application;
 
 using static System.FormattableString;
 
-namespace IpGeolocator.Trash
+namespace IpGeolocator.Application
 {
-    internal static partial class Test
+    internal static class DatabaseUtils
     {
-        public static void Run()
+        public static I2LDatabase Read(Stream stream)
         {
-            var datFile = @"C:\Users\xm\Downloads\IP-COUNTRY-REGION-CITY.DAT";
-            //using (var input = File.OpenRead(@"C:\Users\xm\Downloads\IP-COUNTRY-REGION-CITY.CSV"))
-            //{
-            //    using (var output = File.Create(datFile, 4096, FileOptions.SequentialScan))
-            //    {
-            //        ConvertCsvToDat(input, output);
-            //    }
-            //}
-
-            Database db;
-            using (var input = File.OpenRead(datFile))
+            using var decompressed = new DeflateStream(stream, CompressionMode.Decompress, true);
+            using var buffered = new BufferedStream(decompressed, 65536);
+            using var reader = new BinaryReader(buffered, Encoding.ASCII, true);
+            var version = reader.ReadInt32();
+            if (version != 1)
             {
-                db = ReadDat(input);
+                throw new InvalidDataException(Invariant($"Invalid version {version}."));
             }
 
-            var locator = new IP2LocationGeolocator(db);
-            var ip = IPAddress.Parse("185.127.224.3");
-            var sw = Stopwatch.StartNew();
-            int i;
-            for (i = 0; i < 50000000; i++)
+            var atomsCount = reader.ReadInt32();
+            var locationsCount = reader.ReadInt32();
+            var intervalsCount = reader.ReadInt32();
+
+            var atoms = new string[atomsCount];
+            for (var i = 0; i < atomsCount; i++)
             {
-                locator.Geolocate(ip);
+                atoms[i] = reader.ReadString();
             }
 
-            var location = locator.Geolocate(ip);
-            Console.WriteLine("{0} {1} {2} {3}", location.Country, location.Region, location.City, i / sw.Elapsed.TotalSeconds);
+            var locations = new I2LLocation[locationsCount];
+            for (var i = 0; i < locationsCount; i++)
+            {
+                var countryIndex = reader.ReadInt32();
+                var regionIndex = reader.ReadInt32();
+                var cityIndex = reader.ReadInt32();
+                locations[i] = new I2LLocation(countryIndex, regionIndex, cityIndex);
+            }
+
+            var intervals = new I2LInterval4[intervalsCount];
+            for (var i = 0; i < intervalsCount; i++)
+            {
+                var fromAddress = reader.ReadUInt32();
+                var toAddress = reader.ReadUInt32();
+                var index = reader.ReadInt32();
+                intervals[i] = new I2LInterval4(fromAddress, toAddress, index);
+            }
+
+            return new I2LDatabase(intervals, locations, atoms);
         }
 
-        private static void ConvertCsvToDat(Stream input, Stream output)
+        public static void ConvertFromCsv(Stream input, Stream output)
         {
             var nfi = NumberFormatInfo.InvariantInfo;
-            var records = new List<LocationV4Record>();
+            var intervals = new List<I2LInterval4>();
             var atomMap = new Dictionary<string, int>() { [""] = 0 };
-            var locationIndexMap = new Dictionary<Location, int>();
+            var locationIndexMap = new Dictionary<I2LLocation, int>();
             using (var file = new StreamReader(input, Encoding.ASCII, false, 65536, true))
             {
                 while (true)
@@ -92,14 +100,14 @@ namespace IpGeolocator.Trash
                     citySpan = citySpan.Slice(0, citySpan.IndexOf('"'));
                     var cityIndex = Atomize(citySpan.ToString());
 
-                    var locationKey = new Location(countryIndex, regionIndex, cityIndex);
+                    var locationKey = new I2LLocation(countryIndex, regionIndex, cityIndex);
                     if (!locationIndexMap.TryGetValue(locationKey, out var locationIndex))
                     {
                         locationIndex = locationIndexMap.Count;
                         locationIndexMap.Add(locationKey, locationIndex);
                     }
 
-                    records.Add(new LocationV4Record(fromAddress, toAddress, locationIndex));
+                    intervals.Add(new I2LInterval4(fromAddress, toAddress, locationIndex));
                 }
             }
 
@@ -109,7 +117,7 @@ namespace IpGeolocator.Trash
                 atoms[pair.Value] = pair.Key;
             }
 
-            var locations = new Location[locationIndexMap.Count];
+            var locations = new I2LLocation[locationIndexMap.Count];
             foreach (var pair in locationIndexMap)
             {
                 locations[pair.Value] = pair.Key;
@@ -121,7 +129,7 @@ namespace IpGeolocator.Trash
             writer.Write(1);
             writer.Write(atoms.Length);
             writer.Write(locations.Length);
-            writer.Write(records.Count);
+            writer.Write(intervals.Count);
             foreach (var atom in atoms)
             {
                 writer.Write(atom);
@@ -134,7 +142,7 @@ namespace IpGeolocator.Trash
                 writer.Write(location.CityIndex);
             }
 
-            foreach (var item in records)
+            foreach (var item in intervals)
             {
                 writer.Write(item.FromAddress);
                 writer.Write(item.ToAddress);
@@ -161,48 +169,6 @@ namespace IpGeolocator.Trash
 
                 return index;
             }
-        }
-
-        private static Database ReadDat(Stream stream)
-        {
-            using var decompressed = new DeflateStream(stream, CompressionMode.Decompress, true);
-            using var buffered = new BufferedStream(decompressed, 65536);
-            using var reader = new BinaryReader(buffered, Encoding.ASCII, true);
-            var version = reader.ReadInt32();
-            if (version != 1)
-            {
-                throw new InvalidDataException(Invariant($"Invalid version {version}."));
-            }
-
-            var atomsCount = reader.ReadInt32();
-            var locationsCount = reader.ReadInt32();
-            var recordsCount = reader.ReadInt32();
-
-            var atoms = new string[atomsCount];
-            for (var i = 0; i < atomsCount; i++)
-            {
-                atoms[i] = reader.ReadString();
-            }
-
-            var locations = new Location[locationsCount];
-            for (var i = 0; i < locationsCount; i++)
-            {
-                var countryIndex = reader.ReadInt32();
-                var regionIndex = reader.ReadInt32();
-                var cityIndex = reader.ReadInt32();
-                locations[i] = new Location(countryIndex, regionIndex, cityIndex);
-            }
-
-            var records = new LocationV4Record[recordsCount];
-            for (var i = 0; i < recordsCount; i++)
-            {
-                var fromAddress = reader.ReadUInt32();
-                var toAddress = reader.ReadUInt32();
-                var index = reader.ReadInt32();
-                records[i] = new LocationV4Record(fromAddress, toAddress, index);
-            }
-
-            return new Database(records, locations, atoms);
         }
     }
 }

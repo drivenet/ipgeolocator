@@ -2,11 +2,11 @@
 
 using static System.FormattableString;
 
-namespace IpGeolocator.Geolocator.Application
+namespace IpGeolocator.Application
 {
-    internal readonly struct LocationV4Record
+    internal readonly struct I2LInterval4
     {
-        public LocationV4Record(uint fromAddress, uint toAddress, int index)
+        public I2LInterval4(uint fromAddress, uint toAddress, int index)
         {
             FromAddress = fromAddress;
             ToAddress = toAddress;
