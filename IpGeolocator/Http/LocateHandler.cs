@@ -34,8 +34,7 @@ namespace IpGeolocator.Http
                 return;
             }
 
-            var asciiEncoding = Encoding.ASCII;
-            using var reader = new StreamReader(request.Body, encoding: asciiEncoding, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+            using var reader = new StreamReader(request.Body, encoding: Encoding.ASCII, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
             var requestLineTask = reader.ReadLineAsync();
             var responseLineTask = Task.CompletedTask;
             response.ContentType = "text/plain";
@@ -57,7 +56,7 @@ namespace IpGeolocator.Http
                 var locationInfo = _geolocator.Geolocate(address);
                 var responseLine = string.Concat(requestLine, "\t", locationInfo.Country, "\t", locationInfo.Region, "\t", locationInfo.City, "\n");
                 await responseLineTask;
-                responseLineTask = response.WriteAsync(responseLine, asciiEncoding);
+                responseLineTask = response.WriteAsync(responseLine, Encoding.ASCII);
             }
 
             await responseLineTask;
