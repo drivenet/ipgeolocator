@@ -14,7 +14,7 @@ namespace IpGeolocator.Application
                 throw new ArgumentException("Invalid I2L database file name.", nameof(fileName));
             }
 
-            _fileName = fileName;
+            _fileName = Path.GetFullPath(fileName);
         }
 
         public Stream Open()
