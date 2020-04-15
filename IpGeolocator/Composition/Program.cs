@@ -42,7 +42,7 @@ namespace IpGeolocator.Composition
                 }
             }
 
-            Console.Error.Write(
+            Console.Error.WriteLine(
                 "ipgeolocator serve [--config appsettings.json] [--hostingconfig hostingsettings.json]" + Environment.NewLine
                 + "ipgeolocator convert < IP-COUNTRY-REGION-CITY.CSV > IP-COUNTRY-REGION-CITY.DAT");
             return -1;
