@@ -47,6 +47,12 @@ namespace IpGeolocator.Composition
             });
         }
 
+        private static void ConfigureAspNet(IServiceCollection services)
+        {
+            services.AddRouting();
+            services.AddSingleton<LocateHandler>();
+        }
+
         private void ConfigureApplication(IServiceCollection services)
         {
             var databaseFileName = _configuration.GetValue("databaseFileName", "IP-COUNTRY-REGION-CITY.DAT");
@@ -58,12 +64,6 @@ namespace IpGeolocator.Composition
             services.AddSingleton<IGeolocator, I2LGeolocator>();
 
             services.AddHostedService<PreheatingService>();
-        }
-
-        private void ConfigureAspNet(IServiceCollection services)
-        {
-            services.AddRouting();
-            services.AddSingleton<LocateHandler>();
         }
     }
 }
