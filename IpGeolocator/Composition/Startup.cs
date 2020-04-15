@@ -6,7 +6,6 @@ using IpGeolocator.InputPorts;
 using IpGeolocator.Policy;
 
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -29,16 +28,8 @@ namespace IpGeolocator.Composition
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddRouting();
-            services.AddSingleton<LocateHandler>();
-
-            services.AddSingleton<II2LDatabaseSource>(provider =>
-                new CachingI2LDatabaseSource(
-                    new StreamI2LDatabaseSource(
-                        new FileI2LDatabaseStreamFactory(@"C:\Users\xm\Downloads\IP-COUNTRY-REGION-CITY.DAT")),
-                    provider.GetService<ILogger<CachingI2LDatabaseSource>>()));
-            services.AddSingleton<IGeolocator, I2LGeolocator>();
-            services.AddHostedService<PreheatingService>();
+            ConfigureApplication(services);
+            ConfigureAspNet(services);
         }
 
         public void Configure(IApplicationBuilder app)
@@ -54,27 +45,25 @@ namespace IpGeolocator.Composition
             {
                 routes.MapPost("/v0.1/locate", app.ApplicationServices.GetRequiredService<LocateHandler>().Invoke);
             });
+        }
 
-#if false
-            var locator = app.ApplicationServices.GetRequiredService<IGeolocator>();
-            var ip = IPAddress.Parse("185.127.224.3");
-            var location = locator.Geolocate(ip);
-            int i;
-            for (i = 0; i < 10000000; i++)
-            {
-                locator.Geolocate(ip);
-            }
+        private void ConfigureApplication(IServiceCollection services)
+        {
+            var databaseFileName = _configuration.GetValue("databaseFileName", "IP-COUNTRY-REGION-CITY.DAT");
+            services.AddSingleton<II2LDatabaseSource>(provider =>
+                new CachingI2LDatabaseSource(
+                    new StreamI2LDatabaseSource(
+                        new FileI2LDatabaseStreamFactory(databaseFileName)),
+                    provider.GetService<ILogger<CachingI2LDatabaseSource>>()));
+            services.AddSingleton<IGeolocator, I2LGeolocator>();
 
-            var sw = Stopwatch.StartNew();
-            for (i = 0; i < 100000000; i++)
-            {
-                locator.Geolocate(ip);
-            }
+            services.AddHostedService<PreheatingService>();
+        }
 
-            sw.Stop();
-
-            Console.WriteLine("{0} {1} {2} {3}", location.Country, location.Region, location.City, i / sw.Elapsed.TotalSeconds);
-#endif
+        private void ConfigureAspNet(IServiceCollection services)
+        {
+            services.AddRouting();
+            services.AddSingleton<LocateHandler>();
         }
     }
 }
