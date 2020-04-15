@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,13 +29,16 @@ namespace IpGeolocator.Http
 
             var request = httpContext.Request;
             var response = httpContext.Response;
-            if (request.ContentType != "text/plain")
+            var exchangeEncoding = Encoding.ASCII;
+            if (MediaTypeHeaderValue.TryParse(request.ContentType, out var contentType)
+                && (contentType.MediaType != "text/plain" ||
+                    (contentType.CharSet is string charSet && charSet != exchangeEncoding.WebName)))
             {
                 response.StatusCode = (int)HttpStatusCode.UnsupportedMediaType;
                 return;
             }
 
-            using var reader = new StreamReader(request.Body, encoding: Encoding.ASCII, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+            using var reader = new StreamReader(request.Body, encoding: exchangeEncoding, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
             var requestLineTask = reader.ReadLineAsync();
             var responseLineTask = Task.CompletedTask;
             response.ContentType = "text/plain";
@@ -56,7 +60,7 @@ namespace IpGeolocator.Http
                 var locationInfo = _geolocator.Geolocate(address);
                 var responseLine = string.Concat(requestLine, "\t", locationInfo.Country, "\t", locationInfo.Region, "\t", locationInfo.City, "\n");
                 await responseLineTask;
-                responseLineTask = response.WriteAsync(responseLine, Encoding.ASCII);
+                responseLineTask = response.WriteAsync(responseLine, exchangeEncoding);
             }
 
             await responseLineTask;
