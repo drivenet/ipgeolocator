@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Text;
 
 using IpGeolocator.Application;
@@ -23,9 +23,7 @@ namespace IpGeolocator.Policy
             get
             {
                 using var stream = _streamFactory.Open();
-                using var decompressed = new DeflateStream(stream, CompressionMode.Decompress, true);
-                using var buffered = new BufferedStream(decompressed, 65536);
-                using var reader = new BinaryReader(buffered, Encoding.ASCII, true);
+                using var reader = new BinaryReader(new BufferedStream(stream, 65536), Encoding.ASCII);
                 var version = reader.ReadInt32();
                 if (version != 1)
                 {

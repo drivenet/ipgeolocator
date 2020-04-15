@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.IO.Compression;
 using System.Text;
 
 namespace IpGeolocator.Application
@@ -79,9 +78,7 @@ namespace IpGeolocator.Application
                 locations[pair.Value] = pair.Key;
             }
 
-            using var compressed = new DeflateStream(output, CompressionLevel.Optimal, true);
-            using var buffered = new BufferedStream(compressed, 65536);
-            using var writer = new BinaryWriter(buffered, Encoding.ASCII, true);
+            using var writer = new BinaryWriter(new BufferedStream(output, 65536), Encoding.ASCII, true);
             writer.Write(1);
             writer.Write(atoms.Length);
             writer.Write(locations.Length);
