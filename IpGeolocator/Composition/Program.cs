@@ -35,10 +35,12 @@ namespace IpGeolocator.Composition
                         break;
 
                     case "serve":
-                        var serveArgs = new string[argsCount - 1];
-                        Array.Copy(args, 1, serveArgs, 0, serveArgs.Length);
-                        await Serve(serveArgs);
-                        break;
+                        {
+                            var serveArgs = new string[argsCount - 1];
+                            Array.Copy(args, 1, serveArgs, 0, serveArgs.Length);
+                            await Serve(serveArgs);
+                            return 0;
+                        }
                 }
             }
 
