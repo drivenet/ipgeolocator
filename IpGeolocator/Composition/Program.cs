@@ -64,9 +64,9 @@ namespace IpGeolocator.Composition
 
         private static void Convert()
         {
-            Application.DatabaseUtils.ConvertFromCsv(
-                Console.OpenStandardInput(),
-                Console.OpenStandardOutput());
+            using var input = Console.OpenStandardInput();
+            using var output = Console.OpenStandardOutput();
+            Application.DatabaseUtils.ConvertFromCsv(input, output);
         }
 
         private static async Task RunHost(IConfiguration appConfiguration, string hostingConfigPath)
