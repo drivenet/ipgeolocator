@@ -13,7 +13,42 @@ namespace IpGeolocator.Composition
 {
     public static class Program
     {
-        public static async Task Main(string[] args)
+        public static async Task<int> Main(string[] args)
+        {
+            if (args is null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
+            var argsCount = args.Length;
+            if (argsCount > 0)
+            {
+                switch (args[0])
+                {
+                    case "convert":
+                        if (argsCount == 1)
+                        {
+                            Convert();
+                            return 0;
+                        }
+
+                        break;
+
+                    case "serve":
+                        var serveArgs = new string[argsCount - 1];
+                        Array.Copy(args, 1, serveArgs, 0, serveArgs.Length);
+                        await Serve(serveArgs);
+                        break;
+                }
+            }
+
+            Console.Error.Write(
+                "ipgeolocator serve [--config appsettings.json] [--hostingconfig hostingsettings.json]" + Environment.NewLine
+                + "ipgeolocator convert < IP-COUNTRY-REGION-CITY.CSV > IP-COUNTRY-REGION-CITY.DAT");
+            return -1;
+        }
+
+        private static async Task Serve(string[] args)
         {
             var commandLineOptions = GetCommandLineOptions(args);
             var appConfiguration = LoadAppConfiguration(commandLineOptions.Config);
@@ -23,6 +58,13 @@ namespace IpGeolocator.Composition
                 await RunHost(appConfiguration, hostingConfigPath);
             }
             while (ServiceManager.IsRunningAsService);
+        }
+
+        private static void Convert()
+        {
+            Application.DatabaseUtils.ConvertFromCsv(
+                Console.OpenStandardInput(),
+                Console.OpenStandardOutput());
         }
 
         private static async Task RunHost(IConfiguration appConfiguration, string hostingConfigPath)
