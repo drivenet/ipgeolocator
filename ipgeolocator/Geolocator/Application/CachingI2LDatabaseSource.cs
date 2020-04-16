@@ -18,7 +18,7 @@ namespace IpGeolocator.Geolocator.Application
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _logger = logger;
-            _timer = new Timer(Refresh, null, TimeSpan.Zero, RefreshInterval);
+            _timer = new Timer(Load, null, TimeSpan.Zero, RefreshInterval);
         }
 
         public I2LDatabase Database => _database ?? GetDatabase();
@@ -31,17 +31,11 @@ namespace IpGeolocator.Geolocator.Application
             lock (_timer)
 #pragma warning restore CA2002 // Do not lock on objects with weak identity
             {
-                var database = _database;
-                if (database is null)
-                {
-                    _database = database = _inner.Database;
-                }
-
-                return database;
+                return _database ?? (_database = _inner.Database);
             }
         }
 
-        private void Refresh(object? state)
+        private void Load(object? state)
         {
             var lockTaken = false;
             try
@@ -49,14 +43,8 @@ namespace IpGeolocator.Geolocator.Application
                 Monitor.TryEnter(_timer, ref lockTaken);
                 if (lockTaken)
                 {
-                    _database = _inner.Database;
+                    Load();
                 }
-            }
-#pragma warning disable CA1031 // Do not catch general exception types -- robustness is critical in this case
-            catch (Exception exception)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                _logger.LogError(exception, "Failed to refresh cached I2L database.");
             }
             finally
             {
@@ -64,6 +52,20 @@ namespace IpGeolocator.Geolocator.Application
                 {
                     Monitor.Exit(_timer);
                 }
+            }
+        }
+
+        private void Load()
+        {
+            try
+            {
+                _database = _inner.Database;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types -- robustness is critical in this case
+            catch (Exception exception)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                _logger.LogError(exception, "Failed to load I2L database.");
             }
         }
     }
