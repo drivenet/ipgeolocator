@@ -6,6 +6,8 @@ using System.Text;
 
 using IpGeolocator.Geolocator.Services;
 
+using static System.FormattableString;
+
 namespace IpGeolocator.Geolocator.Helpers
 {
     internal static class DatabaseUtils
@@ -66,6 +68,12 @@ namespace IpGeolocator.Geolocator.Helpers
 
                     intervals.Add(new I2LInterval4(fromAddress, toAddress, locationIndex));
                 }
+            }
+
+            const int MinIntervals = 8000000;
+            if (intervals.Count < MinIntervals)
+            {
+                throw new InvalidDataException(Invariant($"The database records count {intervals.Count} is less than minimum allowed {MinIntervals}."));
             }
 
             var atoms = new string[atomMap.Count];
