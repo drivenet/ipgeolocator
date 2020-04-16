@@ -14,6 +14,16 @@ namespace IpGeolocator.Geolocator.Helpers
     {
         public static void ConvertFromCsv(Stream input, Stream output)
         {
+            if (input is null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            if (output is null)
+            {
+                throw new ArgumentNullException(nameof(output));
+            }
+
             var nfi = NumberFormatInfo.InvariantInfo;
             var intervals = new List<I2LInterval4>();
             var atomMap = new Dictionary<string, int>() { [""] = 0 };
@@ -29,6 +39,11 @@ namespace IpGeolocator.Geolocator.Helpers
                     }
 
                     var span = line.AsSpan();
+                    if (span[0] != '"')
+                    {
+                        throw new InvalidDataException(Invariant($"Invalid line: {line}"));
+                    }
+
                     var offset = 1;
                     var fieldSpan = span.Slice(1);
                     fieldSpan = fieldSpan.Slice(0, fieldSpan.IndexOf('"'));
