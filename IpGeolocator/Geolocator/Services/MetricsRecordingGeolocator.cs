@@ -4,7 +4,7 @@ using System.Net;
 
 using IpGeolocator.Metrics;
 
-namespace IpGeolocator.Geolocator.Application
+namespace IpGeolocator.Geolocator.Services
 {
     internal sealed class MetricsRecordingGeolocator : IGeolocator
     {

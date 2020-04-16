@@ -1,4 +1,4 @@
-﻿namespace IpGeolocator.Geolocator.Application
+﻿namespace IpGeolocator.Geolocator.Services
 {
     internal interface II2LDatabaseSource
     {

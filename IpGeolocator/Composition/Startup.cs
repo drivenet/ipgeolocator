@@ -1,7 +1,7 @@
 ﻿using System;
 
 using IpGeolocator.Geolocator;
-using IpGeolocator.Geolocator.Application;
+using IpGeolocator.Geolocator.Services;
 using IpGeolocator.Http;
 using IpGeolocator.Metrics;
 using IpGeolocator.Metrics.Services;

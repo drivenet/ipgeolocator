@@ -2,7 +2,7 @@
 
 using static System.FormattableString;
 
-namespace IpGeolocator.Geolocator.Application
+namespace IpGeolocator.Geolocator.Services
 {
     internal readonly struct I2LInterval4
     {

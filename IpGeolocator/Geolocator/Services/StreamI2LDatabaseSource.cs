@@ -4,7 +4,7 @@ using System.Text;
 
 using static System.FormattableString;
 
-namespace IpGeolocator.Geolocator.Application
+namespace IpGeolocator.Geolocator.Services
 {
     internal sealed class StreamI2LDatabaseSource : II2LDatabaseSource
     {

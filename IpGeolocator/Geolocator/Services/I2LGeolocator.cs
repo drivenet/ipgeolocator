@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace IpGeolocator.Geolocator.Application
+namespace IpGeolocator.Geolocator.Services
 {
     internal sealed class I2LGeolocator : IGeolocator
     {
