@@ -3,6 +3,8 @@
 using IpGeolocator.Geolocator;
 using IpGeolocator.Geolocator.Application;
 using IpGeolocator.Http;
+using IpGeolocator.Metrics;
+using IpGeolocator.Metrics.Services;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -44,6 +46,7 @@ namespace IpGeolocator.Composition
             {
                 routes.MapGet("/version", app.ApplicationServices.GetRequiredService<VersionHandler>().Invoke);
                 routes.MapPost("/v0.1/locate", app.ApplicationServices.GetRequiredService<LocateHandler>().Invoke);
+                routes.MapGet("/v0.1/metrics/{" + MetricsHandler.TemplateName + "}", app.ApplicationServices.GetRequiredService<MetricsHandler>().Invoke);
             });
         }
 
@@ -52,6 +55,7 @@ namespace IpGeolocator.Composition
             services.AddRouting();
             services.AddSingleton<LocateHandler>();
             services.AddSingleton<VersionHandler>();
+            services.AddSingleton<MetricsHandler>();
         }
 
         private void ConfigureApplication(IServiceCollection services)
@@ -62,7 +66,14 @@ namespace IpGeolocator.Composition
                     new StreamI2LDatabaseSource(
                         new FileI2LDatabaseStreamFactory(databaseFileName)),
                     provider.GetService<ILogger<CachingI2LDatabaseSource>>()));
-            services.AddSingleton<IGeolocator, I2LGeolocator>();
+            services.AddSingleton<IGeolocator>(provider =>
+                new MetricsRecordingGeolocator(
+                    new I2LGeolocator(provider.GetRequiredService<II2LDatabaseSource>()),
+                    provider.GetRequiredService<IMetricsRecorder>()));
+            services.AddSingleton<InMemoryMetricsRecorder>();
+            services.AddSingleton<IMetricsSource>(provider => provider.GetRequiredService<InMemoryMetricsRecorder>());
+            services.AddSingleton<IMetricsRecorder>(provider => provider.GetRequiredService<InMemoryMetricsRecorder>());
+            services.AddSingleton<IMetricsManager>(provider => provider.GetRequiredService<InMemoryMetricsRecorder>());
 
             services.AddHostedService<PreheatingService>();
         }
