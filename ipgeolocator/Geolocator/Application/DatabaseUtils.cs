@@ -4,7 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace IpGeolocator.Application
+namespace IpGeolocator.Geolocator.Application
 {
     internal static class DatabaseUtils
     {

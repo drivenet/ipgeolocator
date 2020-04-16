@@ -3,7 +3,7 @@ using System.Threading;
 
 using Microsoft.Extensions.Logging;
 
-namespace IpGeolocator.Application
+namespace IpGeolocator.Geolocator.Application
 {
     internal sealed class CachingI2LDatabaseSource : II2LDatabaseSource, IDisposable
     {

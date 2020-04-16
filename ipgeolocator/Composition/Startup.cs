@@ -1,9 +1,8 @@
 ﻿using System;
 
-using IpGeolocator.Application;
+using IpGeolocator.Geolocator;
+using IpGeolocator.Geolocator.Application;
 using IpGeolocator.Http;
-using IpGeolocator.InputPorts;
-using IpGeolocator.Policy;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using IpGeolocator.Application;
+using IpGeolocator.Geolocator.Application;
 
 using Microsoft.Extensions.Hosting;
 

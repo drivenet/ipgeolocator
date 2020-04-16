@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IpGeolocator.Application
+namespace IpGeolocator.Geolocator.Application
 {
     internal readonly struct I2LLocation : IEquatable<I2LLocation>
     {

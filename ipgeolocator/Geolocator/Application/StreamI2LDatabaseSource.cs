@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-using IpGeolocator.Application;
-
 using static System.FormattableString;
 
-namespace IpGeolocator.Policy
+namespace IpGeolocator.Geolocator.Application
 {
     internal sealed class StreamI2LDatabaseSource : II2LDatabaseSource
     {

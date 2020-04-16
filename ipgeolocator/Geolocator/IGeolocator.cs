@@ -1,8 +1,6 @@
 ﻿using System.Net;
 
-using IpGeolocator.Entities;
-
-namespace IpGeolocator.InputPorts
+namespace IpGeolocator.Geolocator
 {
     public interface IGeolocator
     {

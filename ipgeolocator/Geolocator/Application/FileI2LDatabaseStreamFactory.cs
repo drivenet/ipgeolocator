@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace IpGeolocator.Application
+namespace IpGeolocator.Geolocator.Application
 {
     public sealed class FileI2LDatabaseStreamFactory : II2LDatabaseStreamFactory
     {

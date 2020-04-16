@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IpGeolocator.Application
+namespace IpGeolocator.Geolocator.Application
 {
     internal sealed class I2LDatabase
     {

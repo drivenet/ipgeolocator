@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IpGeolocator.Entities
+namespace IpGeolocator.Geolocator
 {
     public readonly struct LocationInfo : IEquatable<LocationInfo>
     {

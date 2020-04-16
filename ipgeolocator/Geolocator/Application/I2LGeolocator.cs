@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Net;
 
-using IpGeolocator.Entities;
-using IpGeolocator.InputPorts;
-
-namespace IpGeolocator.Application
+namespace IpGeolocator.Geolocator.Application
 {
     internal sealed class I2LGeolocator : IGeolocator
     {

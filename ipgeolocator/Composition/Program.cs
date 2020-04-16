@@ -66,7 +66,7 @@ namespace IpGeolocator.Composition
         {
             using var input = Console.OpenStandardInput();
             using var output = Console.OpenStandardOutput();
-            Application.DatabaseUtils.ConvertFromCsv(input, output);
+            Geolocator.Application.DatabaseUtils.ConvertFromCsv(input, output);
         }
 
         private static async Task RunHost(IConfiguration appConfiguration, string hostingConfigPath)
