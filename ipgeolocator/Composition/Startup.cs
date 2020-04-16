@@ -42,6 +42,7 @@ namespace IpGeolocator.Composition
 
             app.UseEndpoints(routes =>
             {
+                routes.MapGet("/version", app.ApplicationServices.GetRequiredService<VersionHandler>().Invoke);
                 routes.MapPost("/v0.1/locate", app.ApplicationServices.GetRequiredService<LocateHandler>().Invoke);
             });
         }
@@ -50,6 +51,7 @@ namespace IpGeolocator.Composition
         {
             services.AddRouting();
             services.AddSingleton<LocateHandler>();
+            services.AddSingleton<VersionHandler>();
         }
 
         private void ConfigureApplication(IServiceCollection services)
