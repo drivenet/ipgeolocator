@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <TargetFramework>$(NewApplicationTargetFramework)</TargetFramework>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Nullable>enable</Nullable>
     <RootNamespace>IpGeolocator</RootNamespace>
     <NoWarn>$(NoWarn);CA2007</NoWarn>
