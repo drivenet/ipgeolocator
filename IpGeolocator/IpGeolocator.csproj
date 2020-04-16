@@ -5,7 +5,7 @@
     <TargetFramework>$(NewApplicationTargetFramework)</TargetFramework>
     <Version>0.1.1</Version>
     <Nullable>enable</Nullable>
-    <RootNamespace>IpGeolocator</RootNamespace>
+    <AssemblyName>ipgeolocator</AssemblyName>
     <NoWarn>$(NoWarn);CA2007</NoWarn>
   </PropertyGroup>
   
