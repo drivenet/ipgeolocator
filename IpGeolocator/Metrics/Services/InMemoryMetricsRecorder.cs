@@ -9,9 +9,9 @@ namespace IpGeolocator.Metrics.Services
         private long _failureCount;
         private long _elapsedTicks;
 
-        public ulong SuccessCount => unchecked((ulong)_successCount);
+        public ulong SuccessCount => checked((ulong)_successCount);
 
-        public ulong FailureCount => unchecked((ulong)_failureCount);
+        public ulong FailureCount => checked((ulong)_failureCount);
 
         public TimeSpan Elapsed => TimeSpan.FromTicks(_elapsedTicks);
 
