@@ -87,6 +87,11 @@ namespace IpGeolocator.Http
                 }
 
                 var locationInfo = _geolocator.Geolocate(address);
+                if (locationInfo == default)
+                {
+                    continue;
+                }
+
                 await responseLineTask;
                 var length = CreateResponseLine(buffer, requestLine, locationInfo);
                 responseLineTask = output.WriteAsync(buffer.AsMemory(0, length));
