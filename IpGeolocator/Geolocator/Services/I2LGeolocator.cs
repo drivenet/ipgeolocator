@@ -21,7 +21,7 @@ namespace IpGeolocator.Geolocator.Services
 
             if (address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
             {
-                return LocationInfo.Empty;
+                return default;
             }
 
 #pragma warning disable CS0618 // Type or member is obsolete -- this is the fastest way to access IPv4 address
@@ -55,7 +55,7 @@ namespace IpGeolocator.Geolocator.Services
                 }
             }
 
-            return LocationInfo.Empty;
+            return default;
         }
     }
 }

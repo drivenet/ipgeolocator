@@ -5,8 +5,6 @@ namespace IpGeolocator.Geolocator
 {
     public readonly struct LocationInfo : IEquatable<LocationInfo>
     {
-        public static readonly LocationInfo Empty = new LocationInfo("", "", "");
-
         private readonly string? _country;
         private readonly string? _region;
         private readonly string? _city;
@@ -31,10 +29,10 @@ namespace IpGeolocator.Geolocator
         public override readonly bool Equals(object? obj) => obj is LocationInfo info && Equals(info);
 
         public readonly bool Equals(LocationInfo other)
-            => _country == other._country &&
-                _region == other._region &&
-                _city == other._city;
+            => Country == other.Country &&
+                Region == other.Region &&
+                City == other.City;
 
-        public override readonly int GetHashCode() => HashCode.Combine(_country, _region, _city);
+        public override readonly int GetHashCode() => HashCode.Combine(Country, Region, City);
     }
 }

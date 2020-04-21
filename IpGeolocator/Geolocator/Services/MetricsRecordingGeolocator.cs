@@ -24,7 +24,7 @@ namespace IpGeolocator.Geolocator.Services
             var startTime = Stopwatch.GetTimestamp();
             var location = _inner.Geolocate(address);
             var elapsedTicks = Stopwatch.GetTimestamp() - startTime;
-            var isSuccessful = location != LocationInfo.Empty;
+            var isSuccessful = location != default;
             var elapsed = TimeSpan.FromTicks(checked((long)(elapsedTicks * StopwatchTickScale)));
             _metricsRecorder.RecordGeolocation(isSuccessful, elapsed);
             return location;
