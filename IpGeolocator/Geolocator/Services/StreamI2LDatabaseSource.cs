@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.Text;
 
@@ -20,7 +21,7 @@ namespace IpGeolocator.Geolocator.Services
             get
             {
                 using var stream = _streamFactory.Open();
-                using var reader = new BinaryReader(new BufferedStream(stream, 65536), Encoding.ASCII);
+                using var reader = new BinaryReader(new BufferedStream(stream), Encoding.ASCII);
                 var version = reader.ReadInt32();
                 if (version != 1)
                 {
@@ -37,26 +38,76 @@ namespace IpGeolocator.Geolocator.Services
                     atoms[i] = reader.ReadString();
                 }
 
-                var locations = new I2LLocation[locationsCount];
-                for (var i = 0; i < locationsCount; i++)
+                stream.Position = reader.BaseStream.Position;
+                var buffer = Span<byte>.Empty;
+                var locations = ReadLocations(stream, locationsCount, ref buffer);
+                var intervals = ReadIntervals(stream, intervalsCount, ref buffer);
+                return new I2LDatabase(intervals, locations, atoms);
+            }
+        }
+
+        private static I2LLocation[] ReadLocations(Stream stream, int locationsCount, ref Span<byte> buffer)
+        {
+            var locations = new I2LLocation[locationsCount];
+            for (var chunkBase = 0; chunkBase < locationsCount;)
+            {
+                const int LocationsChunkSize = 5000;
+                var chunkSize = Math.Min(locationsCount - chunkBase, LocationsChunkSize);
+                var length = chunkSize * (sizeof(int) + sizeof(uint) + sizeof(int));
+                if (buffer.Length < length)
                 {
-                    var countryIndex = reader.ReadInt32();
-                    var regionIndex = reader.ReadInt32();
-                    var cityIndex = reader.ReadInt32();
+                    buffer = new byte[length];
+                }
+
+                stream.Read(buffer);
+                var offset = 0;
+                for (var i = 0; i < chunkSize; i++)
+                {
+                    var countryIndex = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(offset));
+                    offset += sizeof(int);
+                    var regionIndex = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(offset));
+                    offset += sizeof(int);
+                    var cityIndex = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(offset));
+                    offset += sizeof(int);
                     locations[i] = new I2LLocation(countryIndex, regionIndex, cityIndex);
                 }
 
-                var intervals = new I2LInterval4[intervalsCount];
-                for (var i = 0; i < intervalsCount; i++)
+                chunkBase += chunkSize;
+            }
+
+            return locations;
+        }
+
+        private static I2LInterval4[] ReadIntervals(Stream stream, int intervalsCount, ref Span<byte> span)
+        {
+            var intervals = new I2LInterval4[intervalsCount];
+            for (var chunkBase = 0; chunkBase < intervalsCount;)
+            {
+                const int IntervalsChunkSize = 5000;
+                var chunkSize = Math.Min(intervalsCount - chunkBase, IntervalsChunkSize);
+                var length = chunkSize * (sizeof(uint) + sizeof(uint) + sizeof(int));
+                if (span.Length < length)
                 {
-                    var fromAddress = reader.ReadUInt32();
-                    var toAddress = reader.ReadUInt32();
-                    var index = reader.ReadInt32();
-                    intervals[i] = new I2LInterval4(fromAddress, toAddress, index);
+                    span = new byte[length];
                 }
 
-                return new I2LDatabase(intervals, locations, atoms);
+                stream.Read(span);
+                var offset = 0;
+                for (var i = 0; i < chunkSize; i++)
+                {
+                    var fromAddress = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(offset));
+                    offset += sizeof(uint);
+                    var toAddress = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(offset));
+                    offset += sizeof(uint);
+                    var index = BinaryPrimitives.ReadInt32LittleEndian(span.Slice(offset));
+                    offset += sizeof(int);
+                    intervals[chunkBase + i] = new I2LInterval4(fromAddress, toAddress, index);
+                }
+
+                chunkBase += chunkSize;
             }
+
+            return intervals;
         }
     }
 }
