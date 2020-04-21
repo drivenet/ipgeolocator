@@ -29,41 +29,68 @@ namespace IpGeolocator.Http
 
             var request = httpContext.Request;
             var response = httpContext.Response;
-            var exchangeEncoding = Encoding.ASCII;
+            var requestEncoding = Encoding.ASCII;
             if (MediaTypeHeaderValue.TryParse(request.ContentType, out var contentType)
                 && (contentType.MediaType != "text/plain" ||
-                    (contentType.CharSet is string charSet && charSet != exchangeEncoding.WebName)))
+                    (contentType.CharSet is string charSet && charSet != requestEncoding.WebName)))
             {
                 response.StatusCode = (int)HttpStatusCode.UnsupportedMediaType;
                 return;
             }
 
-            using var reader = new StreamReader(request.Body, encoding: exchangeEncoding, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
-            var requestLineTask = reader.ReadLineAsync();
-            var responseLineTask = Task.CompletedTask;
+            using var input = new StreamReader(request.Body, encoding: requestEncoding, detectEncodingFromByteOrderMarks: false, bufferSize: 256, leaveOpen: true);
             response.ContentType = "text/plain";
+            await Process(input, response.Body);
+        }
+
+        private static int CreateResponseLine(Span<byte> buffer, string requestLine, LocationInfo locationInfo)
+        {
+            var responseEncoding = Encoding.ASCII;
+            var offset = 0;
+            offset += responseEncoding.GetBytes(requestLine, buffer.Slice(offset));
+            buffer[offset++] = unchecked((byte)'\t');
+            offset += responseEncoding.GetBytes(locationInfo.Country, buffer.Slice(offset));
+            buffer[offset++] = unchecked((byte)'\t');
+            offset += responseEncoding.GetBytes(locationInfo.Region, buffer.Slice(offset));
+            buffer[offset++] = unchecked((byte)'\t');
+            offset += responseEncoding.GetBytes(locationInfo.City, buffer.Slice(offset));
+            buffer[offset++] = unchecked((byte)'\n');
+            return offset;
+        }
+
+        private async Task Process(TextReader input, Stream output)
+        {
+            var requestLineTask = input.ReadLineAsync();
+            var responseLineTask = default(ValueTask);
+            var buffer = new byte[256];
             while (true)
             {
-                var requestLine = await requestLineTask;
+                string? requestLine;
+                try
+                {
+                    requestLine = await requestLineTask;
+                }
+                catch (IOException)
+                {
+                    break;
+                }
+
                 if (requestLine is null)
                 {
                     break;
                 }
 
-                requestLineTask = reader.ReadLineAsync();
-                requestLine = requestLine.Trim();
+                requestLineTask = input.ReadLineAsync();
                 if (!IPAddress.TryParse(requestLine, out var address))
                 {
                     continue;
                 }
 
                 var locationInfo = _geolocator.Geolocate(address);
-                var responseLine = string.Concat(requestLine, "\t", locationInfo.Country, "\t", locationInfo.Region, "\t", locationInfo.City, "\n");
                 await responseLineTask;
-                responseLineTask = response.WriteAsync(responseLine, exchangeEncoding);
+                var length = CreateResponseLine(buffer, requestLine, locationInfo);
+                responseLineTask = output.WriteAsync(buffer.AsMemory(0, length));
             }
-
-            await responseLineTask;
         }
     }
 }
