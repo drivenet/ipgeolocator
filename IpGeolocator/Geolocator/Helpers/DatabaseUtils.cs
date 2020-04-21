@@ -58,7 +58,7 @@ namespace IpGeolocator.Geolocator.Helpers
                     offset += countrySpan.Length + 3;
                     var country = countrySpan.ToString();
                     var countryIndex = Atomize(country);
-                    if (countryIndex < 0)
+                    if (countryIndex == 0)
                     {
                         continue;
                     }
