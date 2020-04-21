@@ -3,7 +3,7 @@ using System.IO;
 
 namespace IpGeolocator.Geolocator.Services
 {
-    public sealed class FileI2LDatabaseStreamFactory : II2LDatabaseStreamFactory
+    internal sealed class FileI2LDatabaseStreamFactory : II2LDatabaseStreamFactory
     {
         private readonly string _fileName;
 
