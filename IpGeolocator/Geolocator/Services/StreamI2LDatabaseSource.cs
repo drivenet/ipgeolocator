@@ -42,6 +42,12 @@ namespace IpGeolocator.Geolocator.Services
                 var buffer = Span<byte>.Empty;
                 var locations = ReadLocations(stream, locationsCount, ref buffer);
                 var intervals = ReadIntervals(stream, intervalsCount, ref buffer);
+
+                if (stream.Position != stream.Length)
+                {
+                    throw new InvalidDataException(Invariant($"Stream position {stream.Position} is not at end {stream.Length}."));
+                }
+
                 return new I2LDatabase(intervals, locations, atoms);
             }
         }
@@ -59,7 +65,12 @@ namespace IpGeolocator.Geolocator.Services
                     buffer = new byte[length];
                 }
 
-                stream.Read(buffer);
+                var read = stream.Read(buffer.Slice(0, length));
+                if (read != length)
+                {
+                    throw new InvalidDataException(Invariant($"Read {read} instead of {length} for locations."));
+                }
+
                 var offset = 0;
                 for (var i = 0; i < chunkSize; i++)
                 {
@@ -69,7 +80,7 @@ namespace IpGeolocator.Geolocator.Services
                     offset += sizeof(int);
                     var cityIndex = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(offset));
                     offset += sizeof(int);
-                    locations[i] = new I2LLocation(countryIndex, regionIndex, cityIndex);
+                    locations[chunkBase + i] = new I2LLocation(countryIndex, regionIndex, cityIndex);
                 }
 
                 chunkBase += chunkSize;
@@ -78,7 +89,7 @@ namespace IpGeolocator.Geolocator.Services
             return locations;
         }
 
-        private static I2LInterval4[] ReadIntervals(Stream stream, int intervalsCount, ref Span<byte> span)
+        private static I2LInterval4[] ReadIntervals(Stream stream, int intervalsCount, ref Span<byte> buffer)
         {
             var intervals = new I2LInterval4[intervalsCount];
             for (var chunkBase = 0; chunkBase < intervalsCount;)
@@ -86,20 +97,25 @@ namespace IpGeolocator.Geolocator.Services
                 const int IntervalsChunkSize = 5000;
                 var chunkSize = Math.Min(intervalsCount - chunkBase, IntervalsChunkSize);
                 var length = chunkSize * (sizeof(uint) + sizeof(uint) + sizeof(int));
-                if (span.Length < length)
+                if (buffer.Length < length)
                 {
-                    span = new byte[length];
+                    buffer = new byte[length];
                 }
 
-                stream.Read(span);
+                var read = stream.Read(buffer.Slice(0, length));
+                if (read != length)
+                {
+                    throw new InvalidDataException(Invariant($"Read {read} instead of {length} for intervals."));
+                }
+
                 var offset = 0;
                 for (var i = 0; i < chunkSize; i++)
                 {
-                    var fromAddress = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(offset));
+                    var fromAddress = BinaryPrimitives.ReadUInt32LittleEndian(buffer.Slice(offset));
                     offset += sizeof(uint);
-                    var toAddress = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(offset));
+                    var toAddress = BinaryPrimitives.ReadUInt32LittleEndian(buffer.Slice(offset));
                     offset += sizeof(uint);
-                    var index = BinaryPrimitives.ReadInt32LittleEndian(span.Slice(offset));
+                    var index = BinaryPrimitives.ReadInt32LittleEndian(buffer.Slice(offset));
                     offset += sizeof(int);
                     intervals[chunkBase + i] = new I2LInterval4(fromAddress, toAddress, index);
                 }
