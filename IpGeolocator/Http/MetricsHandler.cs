@@ -32,7 +32,7 @@ namespace IpGeolocator.Http
             {
                 "location_successes" => _metricsSource.SuccessCount.ToString(NumberFormatInfo.InvariantInfo),
                 "location_failures" => _metricsSource.FailureCount.ToString(NumberFormatInfo.InvariantInfo),
-                "location_elapsed" => checked((ulong)Math.Round(_metricsSource.Elapsed.TotalMilliseconds)).ToString(NumberFormatInfo.InvariantInfo),
+                "location_elapsed" => Math.Round(_metricsSource.Elapsed.TotalMilliseconds).ToString(NumberFormatInfo.InvariantInfo),
                 _ => null,
             };
 
