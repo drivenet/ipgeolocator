@@ -61,12 +61,12 @@ namespace IpGeolocator.Composition
         private void ConfigureApplication(IServiceCollection services)
         {
             var databaseFileName = _configuration.GetValue("databaseFileName", "IP-COUNTRY-REGION-CITY.DAT");
-            services.AddSingleton<II2LDatabaseSource>(provider =>
-                new CachingI2LDatabaseSource(
-                    new LoggingI2LDatabaseSource(
-                        new StreamI2LDatabaseSource(
-                            new FileI2LDatabaseStreamFactory(databaseFileName)),
-                        provider.GetService<ILogger<LoggingI2LDatabaseSource>>())));
+            services.AddSingleton<II2LDatabaseSource, CachingI2LDatabaseSource>();
+            services.AddSingleton<II2LDatabaseReader>(provider =>
+                new LoggingI2LDatabaseReader(
+                    new StreamI2LDatabaseReader(
+                        new FileI2LDatabaseStreamFactory(databaseFileName)),
+                    provider.GetService<ILogger<LoggingI2LDatabaseReader>>()));
             services.AddSingleton<IGeolocator>(provider =>
                 new MetricsRecordingGeolocator(
                     new I2LGeolocator(provider.GetRequiredService<II2LDatabaseSource>()),

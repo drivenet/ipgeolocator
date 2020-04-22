@@ -7,49 +7,46 @@ using static System.FormattableString;
 
 namespace IpGeolocator.Geolocator.Services
 {
-    internal sealed class StreamI2LDatabaseSource : II2LDatabaseSource
+    internal sealed class StreamI2LDatabaseReader : II2LDatabaseReader
     {
         private readonly II2LDatabaseStreamFactory _streamFactory;
 
-        public StreamI2LDatabaseSource(II2LDatabaseStreamFactory streamFactory)
+        public StreamI2LDatabaseReader(II2LDatabaseStreamFactory streamFactory)
         {
             _streamFactory = streamFactory ?? throw new ArgumentNullException(nameof(streamFactory));
         }
 
-        public I2LDatabase Database
+        public I2LDatabase ReadDatabase()
         {
-            get
+            using var stream = _streamFactory.Open();
+            using var reader = new BinaryReader(new BufferedStream(stream), Encoding.ASCII);
+            var version = reader.ReadInt32();
+            if (version != 1)
             {
-                using var stream = _streamFactory.Open();
-                using var reader = new BinaryReader(new BufferedStream(stream), Encoding.ASCII);
-                var version = reader.ReadInt32();
-                if (version != 1)
-                {
-                    throw new InvalidDataException(Invariant($"Invalid version {version}."));
-                }
-
-                var atomsCount = reader.ReadInt32();
-                var locationsCount = reader.ReadInt32();
-                var intervalsCount = reader.ReadInt32();
-
-                var atoms = new string[atomsCount];
-                for (var i = 0; i < atomsCount; i++)
-                {
-                    atoms[i] = reader.ReadString();
-                }
-
-                stream.Position = reader.BaseStream.Position;
-                var buffer = Span<byte>.Empty;
-                var locations = ReadLocations(stream, locationsCount, ref buffer);
-                var intervals = ReadIntervals(stream, intervalsCount, ref buffer);
-
-                if (stream.Position != stream.Length)
-                {
-                    throw new InvalidDataException(Invariant($"Stream position {stream.Position} is not at end {stream.Length}."));
-                }
-
-                return new I2LDatabase(intervals, locations, atoms);
+                throw new InvalidDataException(Invariant($"Invalid version {version}."));
             }
+
+            var atomsCount = reader.ReadInt32();
+            var locationsCount = reader.ReadInt32();
+            var intervalsCount = reader.ReadInt32();
+
+            var atoms = new string[atomsCount];
+            for (var i = 0; i < atomsCount; i++)
+            {
+                atoms[i] = reader.ReadString();
+            }
+
+            stream.Position = reader.BaseStream.Position;
+            var buffer = Span<byte>.Empty;
+            var locations = ReadLocations(stream, locationsCount, ref buffer);
+            var intervals = ReadIntervals(stream, intervalsCount, ref buffer);
+
+            if (stream.Position != stream.Length)
+            {
+                throw new InvalidDataException(Invariant($"Stream position {stream.Position} is not at end {stream.Length}."));
+            }
+
+            return new I2LDatabase(intervals, locations, atoms);
         }
 
         private static I2LLocation[] ReadLocations(Stream stream, int locationsCount, ref Span<byte> buffer)

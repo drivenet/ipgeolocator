@@ -7,31 +7,31 @@ namespace IpGeolocator.Geolocator.Services
     {
         private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(3);
 
-        private readonly II2LDatabaseSource _inner;
+        private readonly II2LDatabaseReader _inner;
         private readonly Timer _timer;
         private volatile I2LDatabase? _database;
 
-        public CachingI2LDatabaseSource(II2LDatabaseSource inner)
+        public CachingI2LDatabaseSource(II2LDatabaseReader inner)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
-            _timer = new Timer(Load, null, TimeSpan.Zero, RefreshInterval);
+            _timer = new Timer(Refresh, null, TimeSpan.Zero, RefreshInterval);
         }
 
-        public I2LDatabase Database => _database ?? GetDatabase();
+        public I2LDatabase Database => _database ?? ReadDatabase();
 
         public void Dispose() => _timer.Dispose();
 
-        private I2LDatabase GetDatabase()
+        private I2LDatabase ReadDatabase()
         {
 #pragma warning disable CA2002 // Do not lock on objects with weak identity -- locally-constructed object os ok
             lock (_timer)
 #pragma warning restore CA2002 // Do not lock on objects with weak identity
             {
-                return _database ?? (_database = _inner.Database);
+                return _database ?? (_database = _inner.ReadDatabase());
             }
         }
 
-        private void Load(object? state)
+        private void Refresh(object? state)
         {
             var lockTaken = false;
             try
@@ -39,7 +39,7 @@ namespace IpGeolocator.Geolocator.Services
                 Monitor.TryEnter(_timer, ref lockTaken);
                 if (lockTaken)
                 {
-                    Load();
+                    Refresh();
                 }
             }
             finally
@@ -51,11 +51,11 @@ namespace IpGeolocator.Geolocator.Services
             }
         }
 
-        private void Load()
+        private void Refresh()
         {
             try
             {
-                _database = _inner.Database;
+                _database = _inner.ReadDatabase();
             }
 #pragma warning disable CA1031 // Do not catch general exception types -- robustness is critical in this case
             catch

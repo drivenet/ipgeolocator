@@ -2,13 +2,13 @@
 
 namespace IpGeolocator.Geolocator.Services
 {
-    internal sealed partial class LoggingI2LDatabaseSource
+    internal sealed partial class LoggingI2LDatabaseReader
     {
         private static class EventIds
         {
-            public static readonly EventId Loading = new EventId(1, nameof(Loading));
-            public static readonly EventId Loaded = new EventId(2, nameof(Loaded));
-            public static readonly EventId LoadFailed = new EventId(3, nameof(LoadFailed));
+            public static readonly EventId Reading = new EventId(1, nameof(Reading));
+            public static readonly EventId Read = new EventId(2, nameof(Read));
+            public static readonly EventId ReadFailed = new EventId(3, nameof(ReadFailed));
         }
     }
 }

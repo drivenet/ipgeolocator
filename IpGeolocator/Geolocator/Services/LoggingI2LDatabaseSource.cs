@@ -4,36 +4,33 @@ using Microsoft.Extensions.Logging;
 
 namespace IpGeolocator.Geolocator.Services
 {
-    internal sealed partial class LoggingI2LDatabaseSource : II2LDatabaseSource
+    internal sealed partial class LoggingI2LDatabaseReader : II2LDatabaseReader
     {
-        private readonly II2LDatabaseSource _inner;
+        private readonly II2LDatabaseReader _inner;
         private readonly ILogger _logger;
 
-        public LoggingI2LDatabaseSource(II2LDatabaseSource inner, ILogger<LoggingI2LDatabaseSource> logger)
+        public LoggingI2LDatabaseReader(II2LDatabaseReader inner, ILogger<LoggingI2LDatabaseReader> logger)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public I2LDatabase Database
+        public I2LDatabase ReadDatabase()
         {
-            get
+            I2LDatabase result;
+            _logger.LogInformation(EventIds.Reading, "Reading I2L database.");
+            try
             {
-                I2LDatabase result;
-                _logger.LogInformation(EventIds.Loading, "Loading I2L database.");
-                try
-                {
-                    result = _inner.Database;
-                }
-                catch (Exception exception)
-                {
-                    _logger.LogError(EventIds.LoadFailed, exception, "Failed to load I2L database.");
-                    throw;
-                }
-
-                _logger.LogInformation(EventIds.Loaded, "Loaded I2L database.");
-                return result;
+                result = _inner.ReadDatabase();
             }
+            catch (Exception exception)
+            {
+                _logger.LogError(EventIds.ReadFailed, exception, "Failed to read I2L database.");
+                throw;
+            }
+
+            _logger.LogInformation(EventIds.Read, "Reading I2L database.");
+            return result;
         }
     }
 }
