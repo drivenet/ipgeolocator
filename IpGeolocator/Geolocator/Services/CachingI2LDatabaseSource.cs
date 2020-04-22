@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading;
 
-using Microsoft.Extensions.Logging;
-
 namespace IpGeolocator.Geolocator.Services
 {
     internal sealed class CachingI2LDatabaseSource : II2LDatabaseSource, IDisposable
@@ -10,14 +8,12 @@ namespace IpGeolocator.Geolocator.Services
         private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(3);
 
         private readonly II2LDatabaseSource _inner;
-        private readonly ILogger? _logger;
         private readonly Timer _timer;
         private volatile I2LDatabase? _database;
 
-        public CachingI2LDatabaseSource(II2LDatabaseSource inner, ILogger<CachingI2LDatabaseSource>? logger)
+        public CachingI2LDatabaseSource(II2LDatabaseSource inner)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
-            _logger = logger;
             _timer = new Timer(Load, null, TimeSpan.Zero, RefreshInterval);
         }
 
@@ -62,10 +58,9 @@ namespace IpGeolocator.Geolocator.Services
                 _database = _inner.Database;
             }
 #pragma warning disable CA1031 // Do not catch general exception types -- robustness is critical in this case
-            catch (Exception exception)
+            catch
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                _logger?.LogError(exception, "Failed to load I2L database.");
             }
         }
     }
