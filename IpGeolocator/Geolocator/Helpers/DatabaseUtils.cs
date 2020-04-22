@@ -12,7 +12,7 @@ namespace IpGeolocator.Geolocator.Helpers
 {
     internal static class DatabaseUtils
     {
-        public static void ConvertFromCsv(Stream input, Stream output)
+        public static void ConvertFromCsv(Stream input, Stream output, DateTime timestamp)
         {
             if (input is null)
             {
@@ -104,7 +104,9 @@ namespace IpGeolocator.Geolocator.Helpers
             }
 
             using var writer = new BinaryWriter(new BufferedStream(output, 65536), Encoding.ASCII, true);
-            writer.Write(1);
+            const int Version = 2;
+            writer.Write(Version);
+            writer.Write(timestamp.ToUniversalTime().ToBinary());
             writer.Write(atoms.Length);
             writer.Write(locations.Length);
             writer.Write(intervals.Count);
