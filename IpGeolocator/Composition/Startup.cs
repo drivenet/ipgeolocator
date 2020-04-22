@@ -47,6 +47,7 @@ namespace IpGeolocator.Composition
                 routes.MapGet("/version", app.ApplicationServices.GetRequiredService<VersionHandler>().Invoke);
                 routes.MapPost("/v0.1/locate", app.ApplicationServices.GetRequiredService<LocateHandler>().Invoke);
                 routes.MapGet("/v0.1/metrics/{" + MetricsHandler.TemplateName + "}", app.ApplicationServices.GetRequiredService<MetricsHandler>().Invoke);
+                routes.MapGet("/v0.1/metadata/{" + MetadataHandler.TemplateName + "}", app.ApplicationServices.GetRequiredService<MetadataHandler>().Invoke);
             });
         }
 
@@ -56,6 +57,7 @@ namespace IpGeolocator.Composition
             services.AddSingleton<LocateHandler>();
             services.AddSingleton<VersionHandler>();
             services.AddSingleton<MetricsHandler>();
+            services.AddSingleton<MetadataHandler>();
         }
 
         private void ConfigureApplication(IServiceCollection services)
