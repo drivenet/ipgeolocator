@@ -29,7 +29,7 @@ namespace IpGeolocator.Geolocator.Services
                 throw;
             }
 
-            _logger.LogInformation(EventIds.Read, "Reading I2L database.");
+            _logger.LogInformation(EventIds.Read, "Read I2L database, intervals: {intervals}, time: {timestamp:o}.", result.Intervals.Length, result.Timestamp);
             return result;
         }
     }

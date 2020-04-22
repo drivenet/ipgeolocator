@@ -21,9 +21,19 @@ namespace IpGeolocator.Geolocator.Services
             using var stream = _streamFactory.Open();
             using var reader = new BinaryReader(new BufferedStream(stream), Encoding.ASCII);
             var version = reader.ReadInt32();
-            if (version != 1)
+            DateTime timestamp;
+            switch (version)
             {
-                throw new InvalidDataException(Invariant($"Invalid version {version}."));
+                case 1:
+                    timestamp = new DateTime(2020, 04, 21, 13, 18, 00, 0, DateTimeKind.Utc);
+                    break;
+
+                case 2:
+                    timestamp = DateTime.FromBinary(reader.ReadInt64());
+                    break;
+
+                default:
+                    throw new InvalidDataException(Invariant($"Invalid version {version}."));
             }
 
             var atomsCount = reader.ReadInt32();
@@ -46,7 +56,7 @@ namespace IpGeolocator.Geolocator.Services
                 throw new InvalidDataException(Invariant($"Stream position {stream.Position} is not at end {stream.Length}."));
             }
 
-            return new I2LDatabase(intervals, locations, atoms);
+            return new I2LDatabase(intervals, locations, atoms, timestamp);
         }
 
         private static I2LLocation[] ReadLocations(Stream stream, int locationsCount, ref Span<byte> buffer)
