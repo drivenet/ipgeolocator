@@ -13,6 +13,8 @@ namespace IpGeolocator.Http
     {
         public const string TemplateName = "metadataName";
 
+        private static readonly DateTime UtcEpoch = new DateTime(1970, 01, 01, 0, 0, 0, 0, DateTimeKind.Utc);
+
         private readonly II2LDatabaseSource _dbSource;
 
         public MetadataHandler(II2LDatabaseSource dbSource)
@@ -31,6 +33,7 @@ namespace IpGeolocator.Http
             var value = metadataName switch
             {
                 "db_timestamp" => _dbSource.Database.Timestamp.ToString("o", NumberFormatInfo.InvariantInfo),
+                "db_timestamp_unix" => ((_dbSource.Database.Timestamp - UtcEpoch).Ticks / TimeSpan.TicksPerSecond).ToString(NumberFormatInfo.InvariantInfo),
                 "db_intervals" => _dbSource.Database.Intervals.Length.ToString(NumberFormatInfo.InvariantInfo),
                 _ => null,
             };
