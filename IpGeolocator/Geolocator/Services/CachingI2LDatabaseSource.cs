@@ -65,7 +65,7 @@ namespace IpGeolocator.Geolocator.Services
             catch (Exception exception)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                _logger.LogError(exception, "Failed to load I2L database.");
+                _logger?.LogError(exception, "Failed to load I2L database.");
             }
         }
     }
