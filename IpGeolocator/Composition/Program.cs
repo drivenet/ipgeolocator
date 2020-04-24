@@ -15,11 +15,6 @@ namespace IpGeolocator.Composition
     {
         public static async Task<int> Main(string[] args)
         {
-            if (args is null)
-            {
-                throw new ArgumentNullException(nameof(args));
-            }
-
             var argsCount = args.Length;
             if (argsCount > 0)
             {
@@ -105,19 +100,9 @@ namespace IpGeolocator.Composition
 
         private static void ConfigureLogging(ILoggingBuilder loggingBuilder, HostingOptions hostingOptions)
         {
-            if (loggingBuilder is null)
-            {
-                throw new ArgumentNullException(nameof(loggingBuilder));
-            }
-
-            if (hostingOptions is null)
-            {
-                throw new ArgumentNullException(nameof(hostingOptions));
-            }
-
             loggingBuilder.AddFilter(
                 (category, level) => level >= LogLevel.Warning
-                    || (level >= LogLevel.Information && !category.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase)));
+                    || (level >= LogLevel.Information && !category.StartsWith("Microsoft.AspNetCore.", StringComparison.OrdinalIgnoreCase)));
             var hasJournalD = Journal.IsSupported;
             if (hasJournalD)
             {
@@ -136,22 +121,14 @@ namespace IpGeolocator.Composition
 
         private static void ConfigureKestrel(KestrelServerOptions options, HostingOptions hostingOptions)
         {
-            if (options is null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
             options.AddServerHeader = false;
             options.Limits.MaxRequestBodySize = 1 << 20;
             options.Limits.MaxRequestHeadersTotalSize = 8192;
 
-            if (hostingOptions is object)
+            var maxConcurrentConnections = hostingOptions.MaxConcurrentConnections;
+            if (maxConcurrentConnections != 0)
             {
-                var maxConcurrentConnections = hostingOptions.MaxConcurrentConnections;
-                if (maxConcurrentConnections != 0)
-                {
-                    options.Limits.MaxConcurrentConnections = maxConcurrentConnections;
-                }
+                options.Limits.MaxConcurrentConnections = maxConcurrentConnections;
             }
 
             options.UseSystemd();
