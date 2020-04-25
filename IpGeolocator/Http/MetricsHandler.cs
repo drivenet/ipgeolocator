@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 using IpGeolocator.Metrics;
@@ -36,13 +37,16 @@ namespace IpGeolocator.Http
                 _ => null,
             };
 
+            var response = context.Response;
             if (value is null)
             {
-                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                response.StatusCode = (int)HttpStatusCode.NotFound;
                 return;
             }
 
-            await context.Response.WriteAsync(value);
+            var result = Encoding.ASCII.GetBytes(value);
+            response.ContentLength = result.Length;
+            await response.Body.WriteAsync(result);
         }
     }
 }
