@@ -38,9 +38,16 @@ namespace IpGeolocator.Http
                 return;
             }
 
-            using var input = new StreamReader(request.Body, encoding: requestEncoding, detectEncodingFromByteOrderMarks: false, bufferSize: 256, leaveOpen: true);
-            response.ContentType = "text/plain";
-            await Process(input, response.Body);
+            try
+            {
+                using var input = new StreamReader(request.Body, encoding: requestEncoding, detectEncodingFromByteOrderMarks: false, bufferSize: 256, leaveOpen: true);
+                response.ContentType = "text/plain";
+                await Process(input, response.Body);
+            }
+            catch (OperationCanceledException)
+            {
+                response.StatusCode = StatusCodes.Status408RequestTimeout;
+            }
         }
 
         private static int CreateResponseLine(Span<byte> buffer, string requestLine, LocationInfo locationInfo)
