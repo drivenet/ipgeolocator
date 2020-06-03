@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,7 +39,7 @@ namespace IpGeolocator.Http
             var response = context.Response;
             if (value is null)
             {
-                response.StatusCode = (int)HttpStatusCode.NotFound;
+                response.StatusCode = StatusCodes.Status404NotFound;
                 return;
             }
 

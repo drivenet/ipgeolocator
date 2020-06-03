@@ -34,7 +34,7 @@ namespace IpGeolocator.Http
                 && (contentType.MediaType != "text/plain" ||
                     (contentType.CharSet is string charSet && charSet != requestEncoding.WebName)))
             {
-                response.StatusCode = (int)HttpStatusCode.UnsupportedMediaType;
+                response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
                 return;
             }
 
