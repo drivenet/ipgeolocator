@@ -33,7 +33,9 @@ namespace IpGeolocator.Composition
             ConfigureAspNet(services);
         }
 
+#pragma warning disable CA1822 // Mark members as static -- future-proofing
         public void Configure(IApplicationBuilder app)
+#pragma warning restore CA1822 // Mark members as static
         {
             if (app is null)
             {
@@ -44,7 +46,7 @@ namespace IpGeolocator.Composition
 
             app.UseEndpoints(routes =>
             {
-                routes.MapGet("/version", app.ApplicationServices.GetRequiredService<VersionHandler>().Invoke);
+                routes.MapGet("/version", VersionHandler.Invoke);
                 routes.MapPost("/v0.1/locate", app.ApplicationServices.GetRequiredService<LocateHandler>().Invoke);
                 routes.MapGet("/v0.1/metrics/{" + MetricsHandler.TemplateName + "}", app.ApplicationServices.GetRequiredService<MetricsHandler>().Invoke);
                 routes.MapGet("/v0.1/metadata/{" + MetadataHandler.TemplateName + "}", app.ApplicationServices.GetRequiredService<MetadataHandler>().Invoke);
@@ -55,7 +57,6 @@ namespace IpGeolocator.Composition
         {
             services.AddRouting();
             services.AddSingleton<LocateHandler>();
-            services.AddSingleton<VersionHandler>();
             services.AddSingleton<MetricsHandler>();
             services.AddSingleton<MetadataHandler>();
         }

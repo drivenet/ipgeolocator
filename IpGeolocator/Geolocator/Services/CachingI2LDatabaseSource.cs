@@ -36,7 +36,9 @@ namespace IpGeolocator.Geolocator.Services
             var lockTaken = false;
             try
             {
+#pragma warning disable CA2002 // Do not lock on objects with weak identity -- unpublished readonly reference
                 Monitor.TryEnter(_timer, ref lockTaken);
+#pragma warning restore CA2002 // Do not lock on objects with weak identity
                 if (lockTaken)
                 {
                     Refresh();
