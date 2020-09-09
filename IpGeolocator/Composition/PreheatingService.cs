@@ -22,11 +22,13 @@ namespace IpGeolocator.Composition
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await Task.Run(() =>
-            {
-                _geolocator.Geolocate(IPAddress.Loopback);
-                _metricsManager.Reset();
-            });
+            await Task.Run(
+                () =>
+                {
+                    _geolocator.Geolocate(IPAddress.Loopback);
+                    _metricsManager.Reset();
+                },
+                cancellationToken);
         }
 
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

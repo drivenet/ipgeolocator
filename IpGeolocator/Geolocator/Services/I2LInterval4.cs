@@ -4,7 +4,7 @@ using static System.FormattableString;
 
 namespace IpGeolocator.Geolocator.Services
 {
-    internal readonly struct I2LInterval4
+    internal readonly struct I2LInterval4 : IEquatable<I2LInterval4>
     {
         public I2LInterval4(uint fromAddress, uint toAddress, int index)
         {
@@ -28,5 +28,18 @@ namespace IpGeolocator.Geolocator.Services
         public uint ToAddress { get; }
 
         public int Index { get; }
+
+        public static bool operator ==(I2LInterval4 left, I2LInterval4 right) => left.Equals(right);
+
+        public static bool operator !=(I2LInterval4 left, I2LInterval4 right) => !(left == right);
+
+        public override bool Equals(object? obj) => obj is I2LInterval4 interval && Equals(interval);
+
+        public bool Equals(I2LInterval4 other)
+            => FromAddress == other.FromAddress
+            && ToAddress == other.ToAddress
+            && Index == other.Index;
+
+        public override int GetHashCode() => HashCode.Combine(FromAddress, ToAddress);
     }
 }

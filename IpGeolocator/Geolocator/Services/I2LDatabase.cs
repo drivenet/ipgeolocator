@@ -16,11 +16,13 @@ namespace IpGeolocator.Geolocator.Services
             Timestamp = timestamp.ToUniversalTime();
         }
 
+#pragma warning disable CA1819 // Properties should not return arrays -- required for performance reasons
         public I2LInterval4[] Intervals { get; }
 
         public I2LLocation[] Locations { get; }
 
         public string[] Atoms { get; }
+#pragma warning restore CA1819 // Properties should not return arrays
 
         public DateTime Timestamp { get; }
     }
