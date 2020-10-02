@@ -111,7 +111,6 @@ namespace IpGeolocator.Composition
                 loggingBuilder.AddJournal(options =>
                 {
                     options.SyslogIdentifier = "ipgeolocator";
-                    options.DropWhenBusy = true;
                 });
             }
 
