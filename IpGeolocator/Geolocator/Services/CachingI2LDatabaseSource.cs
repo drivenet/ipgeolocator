@@ -27,7 +27,7 @@ namespace IpGeolocator.Geolocator.Services
             lock (_timer)
 #pragma warning restore CA2002 // Do not lock on objects with weak identity
             {
-                return _database ?? (_database = _inner.ReadDatabase());
+                return _database ??= _inner.ReadDatabase();
             }
         }
 
