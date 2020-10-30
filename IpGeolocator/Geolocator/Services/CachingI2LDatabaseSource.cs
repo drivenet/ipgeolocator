@@ -5,7 +5,7 @@ namespace IpGeolocator.Geolocator.Services
 {
     internal sealed class CachingI2LDatabaseSource : II2LDatabaseSource, IDisposable
     {
-        private static readonly TimeSpan RefreshInterval = TimeSpan.FromHours(1);
+        private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(7);
 
         private readonly II2LDatabaseReader _inner;
         private readonly Timer _timer;
