@@ -22,11 +22,6 @@ namespace IpGeolocator.Http
 
         public async Task Invoke(HttpContext httpContext)
         {
-            if (httpContext is null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
-
             var request = httpContext.Request;
             var response = httpContext.Response;
             var requestEncoding = Encoding.ASCII;

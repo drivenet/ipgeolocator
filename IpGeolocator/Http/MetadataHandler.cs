@@ -24,11 +24,6 @@ namespace IpGeolocator.Http
 
         public async Task Invoke(HttpContext context)
         {
-            if (context is null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
             var metadataName = (string)context.Request.RouteValues[TemplateName];
             var value = metadataName switch
             {

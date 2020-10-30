@@ -14,16 +14,6 @@ namespace IpGeolocator.Geolocator.Helpers
     {
         public static void ConvertFromCsv(Stream input, Stream output, DateTime timestamp)
         {
-            if (input is null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
-
-            if (output is null)
-            {
-                throw new ArgumentNullException(nameof(output));
-            }
-
             var nfi = NumberFormatInfo.InvariantInfo;
             var intervals = new List<I2LInterval4>();
             var atomMap = new Dictionary<string, int>() { [""] = 0 };

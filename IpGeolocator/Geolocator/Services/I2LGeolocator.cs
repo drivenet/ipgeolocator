@@ -14,11 +14,6 @@ namespace IpGeolocator.Geolocator.Services
 
         public LocationInfo Geolocate(IPAddress address)
         {
-            if (address is null)
-            {
-                throw new ArgumentNullException(nameof(address));
-            }
-
             if (address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
             {
                 return default;
