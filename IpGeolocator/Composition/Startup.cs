@@ -79,7 +79,6 @@ namespace IpGeolocator.Composition
             services.AddSingleton<IMetricsRecorder>(provider => provider.GetRequiredService<InMemoryMetricsRecorder>());
             services.AddSingleton<IMetricsManager>(provider => provider.GetRequiredService<InMemoryMetricsRecorder>());
 
-            services.AddHostedService<PreheatingService>();
         }
     }
 }
