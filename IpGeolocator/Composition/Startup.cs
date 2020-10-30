@@ -66,11 +66,12 @@ namespace IpGeolocator.Composition
                 new MetricsRecordingGeolocator(
                     new I2LGeolocator(provider.GetRequiredService<II2LDatabaseSource>()),
                     provider.GetRequiredService<IMetricsRecorder>()));
-            services.AddSingleton<InMemoryMetricsRecorder>();
-            services.AddSingleton<IMetricsSource>(provider => provider.GetRequiredService<InMemoryMetricsRecorder>());
-            services.AddSingleton<IMetricsRecorder>(provider => provider.GetRequiredService<InMemoryMetricsRecorder>());
-            services.AddSingleton<IMetricsManager>(provider => provider.GetRequiredService<InMemoryMetricsRecorder>());
 
+            services.AddSingleton<InMemoryMetricsRecorder>();
+            static InMemoryMetricsRecorder MetricsRecorder(IServiceProvider provider) => provider.GetRequiredService<InMemoryMetricsRecorder>();
+            services.AddSingleton<IMetricsSource>(MetricsRecorder);
+            services.AddSingleton<IMetricsRecorder>(MetricsRecorder);
+            services.AddSingleton<IMetricsManager>(MetricsRecorder);
         }
     }
 }
