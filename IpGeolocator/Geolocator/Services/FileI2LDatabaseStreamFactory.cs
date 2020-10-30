@@ -1,23 +1,38 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
+
+using Microsoft.Extensions.Options;
 
 namespace IpGeolocator.Geolocator.Services
 {
     internal sealed class FileI2LDatabaseStreamFactory : II2LDatabaseStreamFactory
     {
-        private readonly string _fileName;
+        private readonly IOptionsMonitor<DatabaseOptions> _options;
 
-        public FileI2LDatabaseStreamFactory(string fileName)
+        public FileI2LDatabaseStreamFactory(IOptionsMonitor<DatabaseOptions> options)
         {
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+        }
+
+        public Stream Open()
+        {
+            var fileName = _options.CurrentValue.DatabaseFileName ?? "IP-COUNTRY-REGION-CITY.DAT";
             if (string.IsNullOrEmpty(fileName))
             {
                 throw new ArgumentException("Invalid I2L database file name.", nameof(fileName));
             }
 
-            _fileName = Path.GetFullPath(fileName);
-        }
+            if (!Path.IsPathRooted(fileName))
+            {
+                if (Assembly.GetEntryAssembly()?.Location is { } path
+                    && Path.GetDirectoryName(path) is { } root)
+                {
+                    fileName = Path.Combine(root, fileName);
+                }
+            }
 
-        public Stream Open()
-            => File.Open(_fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+        }
     }
 }

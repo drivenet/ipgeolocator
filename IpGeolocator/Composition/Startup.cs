@@ -53,13 +53,15 @@ namespace IpGeolocator.Composition
 
         private void ConfigureApplication(IServiceCollection services)
         {
-            var databaseFileName = _configuration.GetValue("databaseFileName", "IP-COUNTRY-REGION-CITY.DAT");
+            services.Configure<DatabaseOptions>(_configuration);
             services.AddSingleton<II2LDatabaseSource, CachingI2LDatabaseSource>();
+            services.AddSingleton<II2LDatabaseStreamFactory, FileI2LDatabaseStreamFactory>();
+            services.AddSingleton<StreamI2LDatabaseReader>();
             services.AddSingleton<II2LDatabaseReader>(provider =>
                 new LoggingI2LDatabaseReader(
-                    new StreamI2LDatabaseReader(
-                        new FileI2LDatabaseStreamFactory(databaseFileName)),
+                    provider.GetRequiredService<StreamI2LDatabaseReader>(),
                     provider.GetService<ILogger<LoggingI2LDatabaseReader>>()));
+
             services.AddSingleton<IGeolocator>(provider =>
                 new MetricsRecordingGeolocator(
                     new I2LGeolocator(provider.GetRequiredService<II2LDatabaseSource>()),
