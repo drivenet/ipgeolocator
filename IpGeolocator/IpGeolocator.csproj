@@ -16,9 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="hostingsettings.json">
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </None>
     <None Update="appsettings.json">
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
