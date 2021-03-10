@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <TargetFramework>$(ApplicationTargetFramework)</TargetFramework>
+    <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <Version>0.4.1</Version>
     <AssemblyName>ipgeolocator</AssemblyName>
