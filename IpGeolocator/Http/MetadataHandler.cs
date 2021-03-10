@@ -24,7 +24,7 @@ namespace IpGeolocator.Http
 
         public async Task Invoke(HttpContext context)
         {
-            var metadataName = (string)context.Request.RouteValues[TemplateName];
+            var metadataName = (string?)context.Request.RouteValues[TemplateName];
             var value = metadataName switch
             {
                 "db_timestamp" => _dbSource.Database.Timestamp.ToString("o", NumberFormatInfo.InvariantInfo),

@@ -22,7 +22,7 @@ namespace IpGeolocator.Http
 
         public async Task Invoke(HttpContext context)
         {
-            var metricName = (string)context.Request.RouteValues[TemplateName];
+            var metricName = (string?)context.Request.RouteValues[TemplateName];
             var value = metricName switch
             {
                 "location_successes" => _metricsSource.SuccessCount.ToString(NumberFormatInfo.InvariantInfo),

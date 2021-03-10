@@ -74,9 +74,6 @@ namespace IpGeolocator.Composition
         private static IWebHostBuilder ConfigureWebHost(IWebHostBuilder webHost)
             => webHost
                 .UseKestrel((builderContext, options) => ConfigureKestrel(builderContext, options))
-#if !MINIMAL_BUILD
-                .UseLibuv()
-#endif
                 .UseStartup<Startup>();
 
 #if MINIMAL_BUILD
@@ -106,10 +103,9 @@ namespace IpGeolocator.Composition
                  || !Journal.IsAvailable)
 #endif
             {
-                loggingBuilder.AddConsole(options =>
+                loggingBuilder.AddSystemdConsole(options =>
                 {
                     options.IncludeScopes = true;
-                    options.Format = ConsoleLoggerFormat.Systemd;
                     options.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fffffffzzz \""
                         + Environment.MachineName
                         + "\" \""
@@ -139,6 +135,9 @@ namespace IpGeolocator.Composition
             }
 
 #if !MINIMAL_BUILD
+#if NET6_0_OR_GREATER
+            options.UseSystemd();
+#else
             // SD_LISTEN_FDS_START https://www.freedesktop.org/software/systemd/man/sd_listen_fds.html
             const int SdListenFdsStart = 3;
             const string ListenFdsEnvVar = "LISTEN_FDS";
@@ -148,7 +147,7 @@ namespace IpGeolocator.Composition
                 if (listenOptions.FileHandle == SdListenFdsStart)
                 {
                     // This matches sd_listen_fds behavior that requires %LISTEN_FDS% to be present and in range [1;INT_MAX-SD_LISTEN_FDS_START]
-                    if (int.TryParse(Environment.GetEnvironmentVariable(ListenFdsEnvVar), NumberStyles.None, NumberFormatInfo.InvariantInfo, out var listenFds)
+                    if (int.TryParse(Environment.GetEnvironmentVariable(ListenFdsEnvVar), System.Globalization.NumberStyles.None, System.Globalization.NumberFormatInfo.InvariantInfo, out var listenFds)
                         && listenFds > 1
                         && listenFds <= int.MaxValue - SdListenFdsStart)
                     {
@@ -159,6 +158,7 @@ namespace IpGeolocator.Composition
                     }
                 }
             });
+#endif
 #endif
         }
 

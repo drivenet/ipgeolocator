@@ -18,7 +18,7 @@ namespace IpGeolocator.Geolocator.Services
         public Stream Open()
         {
             var fileName = _options.CurrentValue.DatabaseFileName ?? "IP-COUNTRY-REGION-CITY.DAT";
-            if (string.IsNullOrEmpty(fileName))
+            if (fileName.Length == 0)
             {
                 throw new ArgumentException("Invalid I2L database file name.", nameof(fileName));
             }

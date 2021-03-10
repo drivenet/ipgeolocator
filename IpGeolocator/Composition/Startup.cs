@@ -60,7 +60,7 @@ namespace IpGeolocator.Composition
             services.AddSingleton<II2LDatabaseReader>(provider =>
                 new LoggingI2LDatabaseReader(
                     provider.GetRequiredService<StreamI2LDatabaseReader>(),
-                    provider.GetService<ILogger<LoggingI2LDatabaseReader>>()));
+                    provider.GetRequiredService<ILogger<LoggingI2LDatabaseReader>>()));
 
             services.AddSingleton<IGeolocator>(provider =>
                 new MetricsRecordingGeolocator(
